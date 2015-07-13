@@ -13,10 +13,33 @@
 			height: 100%;
 			width: 100%;
 		}
+		#crosshair {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			margin-top: -12px;
+			margin-left: -12px;
+		}
+		#gun {
+			position: absolute;
+			bottom: -10px;
+			right: 30%;
+		}
+		#gun.shoot {
+			animation: shoot 0.07s;
+		}
+		@keyframes shoot {
+			0%   {  transform: rotateZ(0deg) translateY(0px) scale(1); }
+			50%  {  transform: rotateZ(5deg) translateY(-10px) scale(1.03); }
+			100% {  transform: rotateZ(0deg) translateY(0px) scale(1); }
+		}
 	</style>
 </head>
 <body>
 	<div id="container"></div>
+	<img id="crosshair" src="crosshair.png" height="24" />
+	<img id="gun" src="P99_MW3.png" height="200" />
+	<audio src="barreta2.mp3" id="barreta_sound"></audio>
 	<script src="PointerLockControls.js"></script>
 	<script src="script.js"></script>
 </body>

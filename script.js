@@ -2,11 +2,14 @@
 var WIDTH = window.innerWidth,
 	HEIGHT = window.innerHeight;
 
-var MOVE_SPEED = 0.2,
+var MOVE_SPEED = 0.1,
 	MOVE_FWD = false,
 	MOVE_BCK = false,
 	MOVE_LEFT = false,
 	MOVE_RIGHT = false;
+
+var pointerLocked = false;
+var bullets = [];
 
 // set some camera attributes
 var VIEW_ANGLE = 45,
@@ -34,17 +37,31 @@ stats.domElement.style.position = 'absolute';
 stats.domElement.style.left = '0px';
 stats.domElement.style.top = '0px';
 
-var $container = document.querySelector('#container');
+var $container = document.getElementById('container');
+var barreta_sound = document.getElementById('barreta_sound');
+var gun = document.getElementById('gun');
+var shooting = false;
 
 document.addEventListener('click', function(ev) {
-	var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
-	if ( havePointerLock ) {
-		var element = document.body;
-		element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-		//element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+	if(pointerLocked && !shooting) {
+		barreta_sound.play();
+		gun.classList.add('shoot');
+		shooting = true;
+		setTimeout(function() {
+			gun.classList.remove('shoot');
+			shooting = false;
+		}, 400);
+	} else {
+		var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+		if ( havePointerLock ) {
+			var element = document.body;
+			element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+			//element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
 
-		//element.requestFullscreen();
-		element.requestPointerLock();
+			//element.requestFullscreen();
+			element.requestPointerLock();
+			pointerLocked = true;
+		}
 	}
 });
 
@@ -61,6 +78,8 @@ scene.add(camera);
 controls = new THREE.PointerLockControls( camera );
 controls.enabled = true;
 scene.add( controls.getObject() );
+
+var raycaster = new THREE.Raycaster();
 
 // light
 var light = new THREE.AmbientLight( 0x404040 ); // soft white light
@@ -150,14 +169,45 @@ for (var i=0; i<map.length; i++) {
 		}
 	}
 }
-
+var intersects_fwd;
 function render() {
 	stats.begin();
 
-	MOVE_FWD && controls.getObject().translateZ( - MOVE_SPEED );
-	MOVE_BCK && controls.getObject().translateZ( MOVE_SPEED );
-	MOVE_LEFT && controls.getObject().translateX( - MOVE_SPEED );
-	MOVE_RIGHT && controls.getObject().translateX( MOVE_SPEED );
+	raycaster.set( controls.getObject().position, controls.getDirection(new THREE.Vector3()) );
+	intersects_fwd = raycaster.intersectObjects( scene.children );
+
+	if(MOVE_FWD) {
+		if(intersects_fwd.length == 0 || intersects_fwd[0].distance > 0.4) {
+			controls.getObject().translateZ(-MOVE_SPEED);
+		}
+	}
+
+	if(MOVE_BCK) {
+		controls.getObject().translateZ(MOVE_SPEED);
+	}
+
+	if(MOVE_LEFT) {
+		var cameraDirection = controls.getDirection(new THREE.Vector3());
+		var downDirection = new THREE.Vector3(0, -1, 0);
+		var checkDirection = cameraDirection.crossVectors(cameraDirection, downDirection);
+		raycaster.set( controls.getObject().position, checkDirection );
+		var intersects = raycaster.intersectObjects( scene.children );
+		if(intersects.length == 0 || intersects[0].distance > 0.4) {
+			controls.getObject().translateX(-MOVE_SPEED);
+		}
+
+	}
+
+	if(MOVE_RIGHT) {
+		var cameraDirection = controls.getDirection(new THREE.Vector3());
+		var downDirection = new THREE.Vector3(0, 1, 0);
+		var checkDirection = cameraDirection.crossVectors(cameraDirection, downDirection);
+		raycaster.set( controls.getObject().position, checkDirection );
+		var intersects = raycaster.intersectObjects( scene.children );
+		if(intersects.length == 0 || intersects[0].distance > 0.4) {
+			controls.getObject().translateX(MOVE_SPEED);
+		}
+	}
 
 	renderer.render( scene, camera );
 
