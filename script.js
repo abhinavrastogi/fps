@@ -2,6 +2,9 @@
 var WIDTH = window.innerWidth,
 	HEIGHT = window.innerHeight;
 
+var CAMERA_SPEED = 0.07,
+	MOVE_SPEED = 0.2;
+
 // set some camera attributes
 var VIEW_ANGLE = 45,
 	ASPECT = WIDTH / HEIGHT,
@@ -32,8 +35,8 @@ scene.add(camera);
 
 // the camera starts at 0,0,0
 // so pull it back
-camera.position.z = 30;
-camera.position.y = 10;
+camera.position.z = 10;
+camera.position.y = 1;
 
 // start the renderer
 renderer.setSize(WIDTH, HEIGHT);
@@ -42,7 +45,7 @@ renderer.setSize(WIDTH, HEIGHT);
 $container.appendChild(renderer.domElement);
 document.body.appendChild( stats.domElement );
 
-var geometry = new THREE.PlaneGeometry( 100, 100, 10, 10 );
+var geometry = new THREE.PlaneGeometry( 20, 20, 10, 10 );
 var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide, wireframe: true} );
 var plane = new THREE.Mesh( geometry, material );
 plane.rotateX(THREE.Math.degToRad(90));
@@ -52,23 +55,40 @@ document.addEventListener('keydown', function(ev) {
 	switch (ev.keyCode) {
 		case 87:
 			// W
-			camera.position.z --;
+			camera.translateZ( -MOVE_SPEED );
 			break;
 
 		case 65:
 			// A
-			camera.position.x --;
+			camera.translateX( -MOVE_SPEED );
 			break;
 
 		case 83:
 			// S
-			camera.position.z ++;
+			camera.translateZ( MOVE_SPEED );
 			break;
 
 		case 68:
 			// D
-			camera.position.x ++;
+			camera.translateX( MOVE_SPEED );
 			break;
+	}
+});
+
+var mousepos = {};
+
+document.addEventListener('mousemove', function(ev) {
+
+	if(ev.clientX > mousepos.clientX) {
+		camera.rotation.y -= CAMERA_SPEED;
+	}
+	else if(ev.clientX < mousepos.clientX) {
+		camera.rotation.y += CAMERA_SPEED;
+	}
+
+	mousepos = {
+		clientX: ev.clientX,
+		clientY: ev.clientY
 	}
 });
 
