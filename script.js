@@ -2,14 +2,30 @@
 var WIDTH = window.innerWidth,
 	HEIGHT = window.innerHeight;
 
-var CAMERA_SPEED = 0.07,
-	MOVE_SPEED = 0.2;
+var MOVE_SPEED = 0.2,
+	MOVE_FWD = false,
+	MOVE_BCK = false,
+	MOVE_LEFT = false,
+	MOVE_RIGHT = false;
 
 // set some camera attributes
 var VIEW_ANGLE = 45,
 	ASPECT = WIDTH / HEIGHT,
 	NEAR = 0.1,
-	FAR = 10000;
+	FAR = 10000, controls;
+
+var map = [
+	[1,0,0,1,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,1,1,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0]
+];
 
 var stats = new Stats();
 stats.setMode( 0 );
@@ -18,10 +34,19 @@ stats.domElement.style.position = 'absolute';
 stats.domElement.style.left = '0px';
 stats.domElement.style.top = '0px';
 
-
-// get the DOM element to attach to
-// - assume we've got jQuery to hand
 var $container = document.querySelector('#container');
+
+document.addEventListener('click', function(ev) {
+	var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+	if ( havePointerLock ) {
+		var element = document.body;
+		element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+		//element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+
+		//element.requestFullscreen();
+		element.requestPointerLock();
+	}
+});
 
 // create a WebGL renderer, camera
 // and a scene
@@ -33,10 +58,17 @@ var scene = new THREE.Scene();
 // add the camera to the scene
 scene.add(camera);
 
-// the camera starts at 0,0,0
-// so pull it back
-camera.position.z = 10;
-camera.position.y = 1;
+controls = new THREE.PointerLockControls( camera );
+controls.enabled = true;
+scene.add( controls.getObject() );
+
+// light
+var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+scene.add( light );
+
+var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+directionalLight.position.set( 10, 10, 0 );
+scene.add( directionalLight );
 
 // start the renderer
 renderer.setSize(WIDTH, HEIGHT);
@@ -45,55 +77,87 @@ renderer.setSize(WIDTH, HEIGHT);
 $container.appendChild(renderer.domElement);
 document.body.appendChild( stats.domElement );
 
-var geometry = new THREE.PlaneGeometry( 20, 20, 10, 10 );
+var geometry = new THREE.PlaneGeometry( 10, 10, 10, 10 );
 var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide, wireframe: true} );
 var plane = new THREE.Mesh( geometry, material );
 plane.rotateX(THREE.Math.degToRad(90));
+//plane.position.x = 5;
+//plane.position.z = 5;
 scene.add( plane );
 
 document.addEventListener('keydown', function(ev) {
 	switch (ev.keyCode) {
 		case 87:
 			// W
-			camera.translateZ( -MOVE_SPEED );
+			MOVE_FWD = true;
 			break;
 
 		case 65:
 			// A
-			camera.translateX( -MOVE_SPEED );
+			MOVE_LEFT = true;
 			break;
 
 		case 83:
 			// S
-			camera.translateZ( MOVE_SPEED );
+			MOVE_BCK = true;
 			break;
 
 		case 68:
 			// D
-			camera.translateX( MOVE_SPEED );
+			MOVE_RIGHT = true;
 			break;
 	}
 });
 
-var mousepos = {};
+document.addEventListener('keyup', function(ev) {
+	switch (ev.keyCode) {
+		case 87:
+			// W
+			MOVE_FWD = false;
+			break;
 
-document.addEventListener('mousemove', function(ev) {
+		case 65:
+			// A
+			MOVE_LEFT = false;
+			break;
 
-	if(ev.clientX > mousepos.clientX) {
-		camera.rotation.y -= CAMERA_SPEED;
-	}
-	else if(ev.clientX < mousepos.clientX) {
-		camera.rotation.y += CAMERA_SPEED;
-	}
+		case 83:
+			// S
+			MOVE_BCK = false;
+			break;
 
-	mousepos = {
-		clientX: ev.clientX,
-		clientY: ev.clientY
+		case 68:
+			// D
+			MOVE_RIGHT = false;
+			break;
 	}
 });
 
+
+// layout map
+for (var i=0; i<map.length; i++) {
+	for (var j=0; j< map[i].length; j++) {
+		if(map[i][j] == 1) {
+			var _geometry = new THREE.BoxGeometry(1, 1, 1);
+			var _material = new THREE.MeshLambertMaterial({color: 0x00ff00});
+			var _cube = new THREE.Mesh(_geometry, _material);
+
+			_cube.position.z = i + 0.5;
+			_cube.position.y = 0.5;
+			_cube.position.x = j + 0.5;
+
+			scene.add(_cube);
+		}
+	}
+}
+
 function render() {
 	stats.begin();
+
+	MOVE_FWD && controls.getObject().translateZ( - MOVE_SPEED );
+	MOVE_BCK && controls.getObject().translateZ( MOVE_SPEED );
+	MOVE_LEFT && controls.getObject().translateX( - MOVE_SPEED );
+	MOVE_RIGHT && controls.getObject().translateX( MOVE_SPEED );
 
 	renderer.render( scene, camera );
 
