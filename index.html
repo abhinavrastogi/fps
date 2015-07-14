@@ -3,8 +3,13 @@
 <head lang="en">
 	<meta charset="UTF-8">
 	<title></title>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/stats.js/r11/Stats.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+	<script src="stats.min.js"></script>
+	<script src="three.min.js"></script>
+	<script src="PointerLockControls.js"></script>
+	<script src="MTLLoader.js"></script>
+	<script src="OBJMTLLoader.js"></script>
+	<script src="OBJLoader.js"></script>
+	<!--<script src="colladaLoader.js"></script>-->
 	<style>
 		* {
 			margin: 0; padding: 0;
@@ -30,7 +35,7 @@
 		}
 		@keyframes shoot {
 			0%   {  transform: rotateZ(0deg) translateY(0px) scale(1); }
-			50%  {  transform: rotateZ(5deg) translateY(-10px) scale(1.03); }
+			50%  {  transform: rotateZ(2deg) translateY(-5px) scale(1.03); }
 			100% {  transform: rotateZ(0deg) translateY(0px) scale(1); }
 		}
 	</style>
@@ -38,9 +43,8 @@
 <body>
 	<div id="container"></div>
 	<img id="crosshair" src="crosshair.png" height="24" />
-	<img id="gun" src="P99_MW3.png" height="200" />
+	<img id="gun" src="P99_MW3.png" height="250" />
 	<audio src="barreta2.mp3" id="barreta_sound"></audio>
-	<script src="PointerLockControls.js"></script>
 	<script src="script.js"></script>
 </body>
 </html>
