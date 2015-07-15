@@ -7,7 +7,7 @@ var MOVE_SPEED = 0.05,
 	MOVE_BCK = false,
 	MOVE_LEFT = false,
 	MOVE_RIGHT = false,
-	move_clip = false,
+	move_clip = true,
 	MOON_LIGHT_INTENSITY = 0.5,
 	STREET_LIGHT_INTENSITY = 1.5,
 	AMBIENT_LIGHT_COLOR = 0x333333;
@@ -27,7 +27,7 @@ var map = [
 	[0,0,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,1,0,0,0,0],
+	[0,0,0,0,0,1,1,1,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
@@ -39,10 +39,10 @@ var lightmap = [
 	[0,4,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
+	[0,4,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
+	[0,4,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0]
 ];
@@ -140,7 +140,7 @@ plane.position.x = 5;
 plane.position.z = 5;
 scene.add( plane );
 
-var moonLight = new THREE.SpotLight( 0xffffff, MOON_LIGHT_INTENSITY );
+var moonLight = new THREE.SpotLight( 0xCCFFFF, MOON_LIGHT_INTENSITY );
 moonLight.position.set( -100, 50, 100 );
 moonLight.castShadow = true;
 moonLight.shadowDarkness = 0.3;
@@ -207,7 +207,7 @@ document.addEventListener('keyup', function(ev) {
 	}
 });
 
-//var axisHelper = new THREE.AxisHelper( 5 );
+//var axisHelper = new THREE.AxisHelper( 1 );
 //scene.add( axisHelper );
 
 // sky box
@@ -280,7 +280,7 @@ loader.load( 'Light Pole/Light Pole.obj', 'Light Pole/Light Pole.mtl', function 
 				spotLight.target = lightTarget;
 				scene.add( spotLight );
 
-				var directionalLight2 = new THREE.PointLight( 0xffffff, STREET_LIGHT_INTENSITY, 5 );
+				var directionalLight2 = new THREE.PointLight( 0xffffff, STREET_LIGHT_INTENSITY, 3 );
 				directionalLight2.position.set( i , 1 - 0.18, j - 0.24 );
 				scene.add( directionalLight2 );
 
@@ -320,6 +320,29 @@ for (var i=0; i<map.length; i++) {
 		}
 	}
 }
+
+var objLoader = new THREE.OBJLoader();
+
+objLoader.load('chain-fence.obj', function(_fence) {
+	console.log("loaded _fence", _fence);
+	_fence.scale.x = _fence.scale.y = _fence.scale.z = 0.05;
+	//fence.traverse(function(child ) {
+	//
+	//	if ( child instanceof THREE.Mesh ) {
+	//		//child.material.map = texture;
+	//		//child.castShadow = true;
+	//		var material2 = new THREE.MeshLambertMaterial({color: 0x0000ff, transparent: true, opacity: 0.5});
+	//		var part = new THREE.Mesh(child.geometry, material2);
+	//		child = part;
+	//		console.log("fence mesh", child);
+	//	}
+	//});
+	for(var i=0; i<10; i++) {
+		var fence = _fence.clone();
+		fence.position.x = i*0.98 + 0.5;
+		scene.add(fence);
+	};
+});
 
 //var house, bbox;
 //var housetextureloader = new THREE.ImageLoader();
