@@ -5,7 +5,7 @@ Experiments to build a FPS game in ThreeJS
 
 http://abhinavrastogi.github.io/fps/
 
-Instructions: Click once to get better mouse controls (pointer lock). Click again to shoot. WASD keys to move. Mouse to look. Space to jump.
+Instructions: Click once to get better mouse controls (pointer lock). Click again to shoot. WASD keys to move. Mouse to look. Space to jump. Shoot lights to turn them off.
 
 ### Meta
 
