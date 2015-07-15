@@ -121,7 +121,7 @@ $container.appendChild(renderer.domElement);
 document.body.appendChild( stats.domElement );
 
 // floor
-var texture = THREE.ImageUtils.loadTexture( "granite.jpg" );
+var texture = THREE.ImageUtils.loadTexture( "assets/granite.jpg" );
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set( 10, 10 );
@@ -212,7 +212,7 @@ document.addEventListener('keyup', function(ev) {
 
 // sky box
 
-var urlPrefix = "lagoon/lagoon_";
+var urlPrefix = "assets/lagoon/lagoon_";
 var urls = [  urlPrefix + "posx.jpg",  urlPrefix + "negx.jpg", urlPrefix + "posy.jpg", urlPrefix + "negy.jpg",  urlPrefix + "posz.jpg", urlPrefix + "negz.jpg" ];
 THREE.ImageUtils.loadTextureCube(urls, null, function(cubemap) {
 	cubemap.format = THREE.RGBFormat;
@@ -243,7 +243,7 @@ THREE.ImageUtils.loadTextureCube(urls, null, function(cubemap) {
 var lightpole;
 var spotLight;
 var loader = new THREE.OBJMTLLoader();
-loader.load( 'Light Pole/Light Pole.obj', 'Light Pole/Light Pole.mtl', function ( object ) {
+loader.load( 'assets/Light Pole/Light Pole.obj', 'assets/Light Pole/Light Pole.mtl', function ( object ) {
 	console.log("loaded", object);
 	//object.position.z = - 100;
 	lightpole = object;
@@ -296,7 +296,7 @@ loader.load( 'Light Pole/Light Pole.obj', 'Light Pole/Light Pole.mtl', function 
 
 }, function(progress) {console.log("progress", progress)}, function(err) {"error", console.log(err)} );
 
-var texture_wall = THREE.ImageUtils.loadTexture( "RedBrick.png" );
+var texture_wall = THREE.ImageUtils.loadTexture( "assets/RedBrick.png" );
 texture_wall.wrapS = THREE.RepeatWrapping;
 texture_wall.wrapT = THREE.RepeatWrapping;
 texture_wall.repeat.set( 2, 2 );
@@ -323,8 +323,7 @@ for (var i=0; i<map.length; i++) {
 
 var objLoader = new THREE.OBJLoader();
 
-objLoader.load('chain-fence.obj', function(_fence) {
-	console.log("loaded _fence", _fence);
+objLoader.load('assets/chain-fence.obj', function(_fence) {
 	_fence.scale.x = _fence.scale.y = _fence.scale.z = 0.05;
 	//fence.traverse(function(child ) {
 	//

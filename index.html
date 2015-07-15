@@ -4,11 +4,12 @@
 	<meta charset="UTF-8">
 	<title></title>
 	<script src="stats.min.js"></script>
-	<script src="three.min.js"></script>
+	<!--<script src="three.min.js"></script>-->
+	<script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
 	<script src="PointerLockControls.js"></script>
-	<script src="MTLLoader.js"></script>
-	<script src="OBJMTLLoader.js"></script>
-	<script src="OBJLoader.js"></script>
+	<script src="loaders/MTLLoader.js"></script>
+	<script src="loaders/OBJMTLLoader.js"></script>
+	<script src="loaders/OBJLoader.js"></script>
 	<!--<script src="colladaLoader.js"></script>-->
 	<style>
 		* {
@@ -42,9 +43,9 @@
 </head>
 <body>
 	<div id="container"></div>
-	<img id="crosshair" src="crosshair.png" height="24" />
-	<img id="gun" src="P99_MW3.png" height="250" />
-	<audio src="barreta2.mp3" id="barreta_sound"></audio>
+	<img id="crosshair" src="assets/crosshair.png" height="24" />
+	<img id="gun" src="assets/P99_MW3.png" height="250" />
+	<audio src="assets/barreta2.mp3" id="barreta_sound"></audio>
 	<script src="script.js"></script>
 </body>
 </html>
