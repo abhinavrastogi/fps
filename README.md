@@ -5,7 +5,7 @@ Experiments to build a FPS game in ThreeJS
 
 http://abhinavrastogi.github.io/fps/
 
-Instructions: Click once to get better mouse controls (pointer lock). Click again to shoot. WASD keys to move. Mouse to look.
+Instructions: Click once to get better mouse controls (pointer lock). Click again to shoot. WASD keys to move. Mouse to look. Space to jump.
 
 ### Meta
 
@@ -24,15 +24,16 @@ Currently I have tried the following features of ThreeJS in this experiment:
 - EnvMaps, skybox
 - Using arrays to generate maps
 - HTML5 Audio playback and CSS transitions (not part of ThreeJS, but part of the experiment)
+- Super simple gravity impl. Needed for jump.
 
 ### Plans
 
 - Loading screen
 - Transparency/Opacity
 - Animations
+- Multi-level (heights) terrain
 - Procedurally generated maps
 - Multi-player over sockets
 - HUD, health, ammo etc
-- Jump
 - Using 3d model for gun (fixed with camera)
 - Other things as I come across them
