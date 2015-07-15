@@ -8,6 +8,8 @@ var MOVE_SPEED = 0.05,
 	MOVE_LEFT = false,
 	MOVE_RIGHT = false,
 	move_clip = true,
+	velocity = {x: 0, y: 0, z: 0},
+	canJump = true,
 	MOON_LIGHT_INTENSITY = 0.5,
 	STREET_LIGHT_INTENSITY = 1.5,
 	AMBIENT_LIGHT_COLOR = 0x333333;
@@ -161,24 +163,31 @@ scene.add( moonLight );
 
 document.addEventListener('keydown', function(ev) {
 	switch (ev.keyCode) {
-		case 87:
-			// W
+		case 87: // W
+			ev.preventDefault();
 			MOVE_FWD = true;
 			break;
 
-		case 65:
-			// A
+		case 65: // A
+			ev.preventDefault();
 			MOVE_LEFT = true;
 			break;
 
-		case 83:
-			// S
+		case 83: // S
+			ev.preventDefault();
 			MOVE_BCK = true;
 			break;
 
-		case 68:
-			// D
+		case 68: // D
+			ev.preventDefault();
 			MOVE_RIGHT = true;
+			break;
+
+		case 32: // space
+			ev.preventDefault();
+
+			if ( canJump === true ) { velocity.y += 3; console.log("jump"); }
+			canJump = false;
 			break;
 	}
 });
@@ -187,21 +196,25 @@ document.addEventListener('keyup', function(ev) {
 	switch (ev.keyCode) {
 		case 87:
 			// W
+			ev.preventDefault();
 			MOVE_FWD = false;
 			break;
 
 		case 65:
 			// A
+			ev.preventDefault();
 			MOVE_LEFT = false;
 			break;
 
 		case 83:
 			// S
+			ev.preventDefault();
 			MOVE_BCK = false;
 			break;
 
 		case 68:
 			// D
+			ev.preventDefault();
 			MOVE_RIGHT = false;
 			break;
 	}
@@ -368,7 +381,7 @@ objLoader.load('assets/chain-fence.obj', function(_fence) {
 //}, function(progress) {console.log("progress", progress)}, function(err) {"error", console.log(err)} );
 
 controls.getObject().translateZ(5);
-
+var prevTime = performance.now();
 var intersects_fwd;
 function render() {
 	stats.begin();
@@ -408,9 +421,26 @@ function render() {
 			controls.getObject().translateX(MOVE_SPEED);
 		}
 	}
+
+	var time = performance.now();
+	var delta = ( time - prevTime ) / 1000;
+
+	velocity.y -= 9.8 * 1 * delta;
+	controls.getObject().translateY( velocity.y * delta );
+
+	if ( controls.getObject().position.y < 0.5 ) {
+
+		velocity.y = 0;
+		controls.getObject().position.y = 0.5;
+
+		canJump = true;
+
+	}
+
 	//bbox.update();
 	renderer.render( scene, camera );
 
+	prevTime = time;
 	stats.end();
 
 	requestAnimationFrame( render );
