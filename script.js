@@ -68,10 +68,15 @@ document.addEventListener('click', function(ev) {
 		raycaster.set( controls.getObject().position, controls.getDirection(new THREE.Vector3()) );
 		var intersects = raycaster.intersectObjects( scene.children, true );
 		//console.log(intersects[0].object.uuid, lightpole.children[0].children[1].uuid);
-		//if(intersects[0] && intersects[0].object.uuid===lightpole.children[0].children[1].uuid) {
+		if(intersects[0]) {
+			lightpoles.forEach(function(lightpole, i) {
+				if(intersects[0].object.uuid===lightpole.id) {
+					lightpoles[i].light.intensity = 0;
+				}
+			});
 		//	directionalLight.intensity = 0;
 		//	directionalLight2.intensity = 0;
-		//}
+		}
 		console.log("intersects", intersects);
 		setTimeout(function() {
 			gun.classList.remove('shoot');
@@ -254,6 +259,7 @@ THREE.ImageUtils.loadTextureCube(urls, null, function(cubemap) {
 // light poles
 
 var lightpole;
+var lightpoles = [];
 var spotLight;
 var loader = new THREE.OBJMTLLoader();
 loader.load( 'assets/Light Pole/Light Pole.obj', 'assets/Light Pole/Light Pole.mtl', function ( object ) {
@@ -300,6 +306,7 @@ loader.load( 'assets/Light Pole/Light Pole.obj', 'assets/Light Pole/Light Pole.m
 				var newlightpole = lightpole.clone();
 				newlightpole.position.set(i, 0.4, j);
 				newlightpole.rotateY(THREE.Math.degToRad(90 * lightmap[i][j]));
+				lightpoles.push({id: newlightpole.children[0].children[1].uuid, light: directionalLight2});
 				scene.add(newlightpole);
 			}
 		}
@@ -386,13 +393,13 @@ var intersects_fwd;
 function render() {
 	stats.begin();
 
-	raycaster.set( controls.getObject().position, controls.getDirection(new THREE.Vector3()) );
-	intersects_fwd = raycaster.intersectObjects( scene.children );
+	//raycaster.set( controls.getObject().position, controls.getDirection(new THREE.Vector3()) );
+	//intersects_fwd = raycaster.intersectObjects( scene.children );
 
 	if(MOVE_FWD) {
-		if(!move_clip || intersects_fwd.length == 0 || intersects_fwd[0].distance > 0.4) {
+		//if(!move_clip || intersects_fwd.length == 0 || intersects_fwd[0].distance > 0.4) {
 			controls.getObject().translateZ(-MOVE_SPEED);
-		}
+		//}
 	}
 
 	if(MOVE_BCK) {
@@ -400,26 +407,26 @@ function render() {
 	}
 
 	if(MOVE_LEFT) {
-		var cameraDirection = controls.getDirection(new THREE.Vector3());
-		var downDirection = new THREE.Vector3(0, -1, 0);
-		var checkDirection = cameraDirection.crossVectors(cameraDirection, downDirection);
-		raycaster.set( controls.getObject().position, checkDirection );
-		var intersects = raycaster.intersectObjects( scene.children );
-		if(!move_clip || intersects.length == 0 || intersects[0].distance > 0.4) {
+		//var cameraDirection = controls.getDirection(new THREE.Vector3());
+		//var downDirection = new THREE.Vector3(0, -1, 0);
+		//var checkDirection = cameraDirection.crossVectors(cameraDirection, downDirection);
+		//raycaster.set( controls.getObject().position, checkDirection );
+		//var intersects = raycaster.intersectObjects( scene.children );
+		//if(!move_clip || intersects.length == 0 || intersects[0].distance > 0.4) {
 			controls.getObject().translateX(-MOVE_SPEED);
-		}
+		//}
 
 	}
 
 	if(MOVE_RIGHT) {
-		var cameraDirection = controls.getDirection(new THREE.Vector3());
-		var downDirection = new THREE.Vector3(0, 1, 0);
-		var checkDirection = cameraDirection.crossVectors(cameraDirection, downDirection);
-		raycaster.set( controls.getObject().position, checkDirection );
-		var intersects = raycaster.intersectObjects( scene.children );
-		if(!move_clip || intersects.length == 0 || intersects[0].distance > 0.4) {
+		//var cameraDirection = controls.getDirection(new THREE.Vector3());
+		//var downDirection = new THREE.Vector3(0, 1, 0);
+		//var checkDirection = cameraDirection.crossVectors(cameraDirection, downDirection);
+		//raycaster.set( controls.getObject().position, checkDirection );
+		//var intersects = raycaster.intersectObjects( scene.children );
+		//if(!move_clip || intersects.length == 0 || intersects[0].distance > 0.4) {
 			controls.getObject().translateX(MOVE_SPEED);
-		}
+		//}
 	}
 
 	var time = performance.now();
