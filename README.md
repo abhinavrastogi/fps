@@ -27,6 +27,7 @@ Currently I have tried the following features of ThreeJS in this experiment:
 
 ### Plans
 
+- Loading screen
 - Transparency/Opacity
 - Animations
 - Procedurally generated maps
