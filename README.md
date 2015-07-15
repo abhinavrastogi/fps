@@ -1,7 +1,13 @@
 # fps
 Experiments to build a FPS game in ThreeJS
 
-Try the demo at http://abhinavrastogi.github.io/fps/. Click once to get better mouse controls (pointer lock). Click again to shoot. WASD keys to move. Mouse to look.
+### Demo
+
+http://abhinavrastogi.github.io/fps/
+
+Instructions: Click once to get better mouse controls (pointer lock). Click again to shoot. WASD keys to move. Mouse to look.
+
+### Meta
 
 Very dirty and unorganized code. Tons of bugs. Minimal features. I just started this project to try out ThreeJS two days ago!
 
@@ -19,7 +25,7 @@ Currently I have tried the following features of ThreeJS in this experiment:
 - Using arrays to generate maps
 - HTML5 Audio playback and CSS transitions (not part of ThreeJS, but part of the experiment)
 
-#### Planned features/experiments
+### Plans
 
 - Transparency/Opacity
 - Animations
