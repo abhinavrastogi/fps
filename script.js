@@ -12,6 +12,7 @@ var MOVE_SPEED = 0.05,
 	canJump = true,
 	MOON_LIGHT_INTENSITY = 0.5,
 	STREET_LIGHT_INTENSITY = 1.5,
+	gamePaused = false,
 	AMBIENT_LIGHT_COLOR = 0x333333;
 
 var pointerLocked = false;
@@ -199,6 +200,14 @@ document.addEventListener('keydown', function(ev) {
 		case 68: // D
 			ev.preventDefault();
 			MOVE_RIGHT = true;
+			break;
+
+		case 9: // tab
+			ev.preventDefault();
+			gamePaused = !gamePaused;
+			if(!gamePaused) {
+				window.requestAnimationFrame(render);
+			}
 			break;
 
 		case 32: // space
@@ -514,7 +523,7 @@ function render() {
 	if(controls.getObject().position.y < -3) {
 		console.log("game over");
 	} else {
-		requestAnimationFrame(render);
+		!gamePaused && requestAnimationFrame(render);
 	}
 }
 
