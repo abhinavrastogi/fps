@@ -36,6 +36,19 @@ var map = [
 	[0,0,0,0,0,0,0,0,0,0]
 ];
 
+var heightmap = [
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,8,7,6,5,0,0,0],
+	[0,0,0,1,2,3,4,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0]
+];
+
 var lightmap = [
 	[0,0,0,0,0,0,0,0,0,0],
 	[0,4,0,0,0,0,0,0,0,0],
@@ -62,7 +75,7 @@ var gun = document.getElementById('gun');
 var shooting = false;
 document.addEventListener('click', function(ev) {
 	if(pointerLocked && !shooting) {
-		barreta_sound.play();
+		//barreta_sound.play();
 		gun.classList.add('shoot');
 		shooting = true;
 		raycaster.set( controls.getObject().position, controls.getDirection(new THREE.Vector3()) );
@@ -133,9 +146,9 @@ texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set( 10, 10 );
 
-var geometry = new THREE.PlaneGeometry( 10, 10, 20, 20 );
+var geometry = new THREE.PlaneGeometry( 10, 10, 10, 10 );
 var material = new THREE.MeshLambertMaterial( {
-	color: 'white',
+	color: 0x999999,
 	//wireframe: true,
 	map: texture
 } );
@@ -321,6 +334,27 @@ texture_wall.wrapS = THREE.RepeatWrapping;
 texture_wall.wrapT = THREE.RepeatWrapping;
 texture_wall.repeat.set( 2, 2 );
 
+// height map
+
+for (var i=0; i<heightmap.length; i++) {
+	for (var j=0; j< heightmap[i].length; j++) {
+		if(heightmap[i][j] > 0) {
+			var _geometry = new THREE.BoxGeometry(1, heightmap[i][j]*0.05, 1);
+			var _material = new THREE.MeshLambertMaterial({color: 0xffffff});
+			var _cube = new THREE.Mesh(_geometry, _material);
+
+			_cube.castShadow = true;
+			_cube.receiveShadow = false;
+
+			_cube.position.z = i + 0.5;
+			_cube.position.y = (heightmap[i][j]*0.05)/2;
+			_cube.position.x = j + 0.5;
+
+			scene.add(_cube);
+		}
+	}
+}
+
 // layout map
 for (var i=0; i<map.length; i++) {
 	for (var j=0; j< map[i].length; j++) {
@@ -395,15 +429,28 @@ function render() {
 
 	//raycaster.set( controls.getObject().position, controls.getDirection(new THREE.Vector3()) );
 	//intersects_fwd = raycaster.intersectObjects( scene.children );
+	var prevcellx = Math.floor(controls.getObject().position.x);
+	var prevcellz = Math.floor(controls.getObject().position.z);
+	var prevcellHeight = heightmap[prevcellz][prevcellx] * 0.05;
 
 	if(MOVE_FWD) {
 		//if(!move_clip || intersects_fwd.length == 0 || intersects_fwd[0].distance > 0.4) {
 			controls.getObject().translateZ(-MOVE_SPEED);
+
+			var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)] * 0.05;
+			if(cellHeight > prevcellHeight + 0.06) {
+				controls.getObject().translateZ(MOVE_SPEED);
+			}
 		//}
 	}
 
 	if(MOVE_BCK) {
 		controls.getObject().translateZ(MOVE_SPEED);
+
+		var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)] * 0.05;
+		if(cellHeight > prevcellHeight + 0.05) {
+			controls.getObject().translateZ(-MOVE_SPEED);
+		}
 	}
 
 	if(MOVE_LEFT) {
@@ -416,6 +463,10 @@ function render() {
 			controls.getObject().translateX(-MOVE_SPEED);
 		//}
 
+		var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)] * 0.05;
+		if(cellHeight > prevcellHeight + 0.05) {
+			controls.getObject().translateX(MOVE_SPEED);
+		}
 	}
 
 	if(MOVE_RIGHT) {
@@ -427,30 +478,44 @@ function render() {
 		//if(!move_clip || intersects.length == 0 || intersects[0].distance > 0.4) {
 			controls.getObject().translateX(MOVE_SPEED);
 		//}
-	}
 
+		var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)] * 0.05;
+		if(cellHeight > prevcellHeight + 0.05) {
+			controls.getObject().translateX(-MOVE_SPEED);
+		}
+	}
+	var cellx = Math.floor(controls.getObject().position.x);
+	var cellz = Math.floor(controls.getObject().position.z);
+	var cellHeight = heightmap[cellz][cellx] * 0.05;
+	//console.log(cellx, cellz, cellHeight);
 	var time = performance.now();
 	var delta = ( time - prevTime ) / 1000;
 
 	velocity.y -= 9.8 * 1 * delta;
 	controls.getObject().translateY( velocity.y * delta );
 
-	if ( controls.getObject().position.y < 0.5 ) {
+	if ( controls.getObject().position.y < cellHeight + 0.5 ) {
 
 		velocity.y = 0;
-		controls.getObject().position.y = 0.5;
+		controls.getObject().position.y = cellHeight + 0.5;
 
 		canJump = true;
 
 	}
 
 	//bbox.update();
-	renderer.render( scene, camera );
+
+	renderer.render(scene, camera);
+
 
 	prevTime = time;
 	stats.end();
 
-	requestAnimationFrame( render );
+	if(controls.getObject().position.y < -3) {
+		console.log("game over");
+	} else {
+		requestAnimationFrame(render);
+	}
 }
 
 
