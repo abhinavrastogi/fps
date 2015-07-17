@@ -2,18 +2,21 @@
 var WIDTH = window.innerWidth,
 	HEIGHT = window.innerHeight;
 
-var MOVE_SPEED = 0.05,
+var MOVE_SPEED = 0.2,
 	MOVE_FWD = false,
 	MOVE_BCK = false,
 	MOVE_LEFT = false,
 	MOVE_RIGHT = false,
 	move_clip = true,
+	STEP_HEIGHT = 0.8,
 	velocity = {x: 0, y: 0, z: 0},
 	canJump = true,
+	PLAYER_HEIGHT = 2.5,
 	MOON_LIGHT_INTENSITY = 0.5,
 	STREET_LIGHT_INTENSITY = 1.5,
 	gamePaused = false,
-	AMBIENT_LIGHT_COLOR = 0x333333;
+	JUMP_SPEED = 6,
+	AMBIENT_LIGHT_COLOR = 0x666666;
 
 var pointerLocked = false;
 var bullets = [];
@@ -24,44 +27,94 @@ var VIEW_ANGLE = 45,
 	NEAR = 0.1,
 	FAR = 999999, controls;
 
-var map = [
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,1,1,1,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0]
-];
+//var wallmap = [
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,1,1,1,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0]
+//];
 
-var heightmap = [
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,8,7,6,5,0,0,0],
-	[0,0,0,1,2,3,4,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0]
-];
+var wallmap = [];
+for(var i=0; i<100; i++) {
+	var arr = [];
+	for (var j=0; j<100; j++) {
+		arr.push(0);
+	}
+	wallmap.push(arr);
+}
 
-var lightmap = [
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,4,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,4,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,4,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0]
-];
+wallmap[10][0] = 5;
+wallmap[11][0] = 15;
+wallmap[12][0] = 10;
+wallmap[13][0] = 5;
+wallmap[14][0] = 5;
+wallmap[15][0] = 5;
+wallmap[16][0] = 5;
+wallmap[17][0] = 5;
+
+//var heightmap = [
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0]
+//];
+
+var heightmap = [];
+for(var i=0; i<100; i++) {
+	var arr = [];
+	for (var j=0; j<100; j++) {
+		arr.push(0);
+	}
+	heightmap.push(arr);
+}
+
+var stepheight = 0.3;
+heightmap[15][12] = stepheight;
+heightmap[16][12] = stepheight;
+heightmap[15][13] = stepheight * 2;
+heightmap[16][13] = stepheight * 2;
+heightmap[15][14] = stepheight * 3;
+heightmap[16][14] = stepheight * 3;
+heightmap[15][15] = stepheight * 4;
+heightmap[16][15] = stepheight * 4;
+
+//var lightmap = [
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,4,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,4,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,4,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0],
+//	[0,0,0,0,0,0,0,0,0,0]
+//];
+
+var lightmap = [];
+for(var i=0; i<100; i++) {
+	var arr = [];
+	for (var j=0; j<100; j++) {
+		arr.push(0);
+	}
+	lightmap.push(arr);
+}
+
+lightmap[10][10] = 4;
+lightmap[40][10] = 4;
+lightmap[80][10] = 4;
 
 var stats = new Stats();
 stats.setMode( 0 );
@@ -75,8 +128,8 @@ var barreta_sound = document.getElementById('barreta_sound');
 var gun = document.getElementById('gun');
 var shooting = false;
 document.addEventListener('click', function(ev) {
-	if(pointerLocked && !shooting) {
-		//barreta_sound.play();
+	if(pointerLocked && !shooting && !gamePaused) {
+		barreta_sound.play();
 		gun.classList.add('shoot');
 		shooting = true;
 		raycaster.set( controls.getObject().position, controls.getDirection(new THREE.Vector3()) );
@@ -86,6 +139,7 @@ document.addEventListener('click', function(ev) {
 			lightpoles.forEach(function(lightpole, i) {
 				if(intersects[0].object.uuid===lightpole.id) {
 					lightpoles[i].light.intensity = 0;
+					lightpoles[i].spotlight.intensity = 0;
 				}
 			});
 		//	directionalLight.intensity = 0;
@@ -145,20 +199,21 @@ document.body.appendChild( stats.domElement );
 var texture = THREE.ImageUtils.loadTexture( "assets/granite.jpg" );
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
-texture.repeat.set( 10, 10 );
+texture.repeat.set( 70, 70 );
 
-var geometry = new THREE.PlaneGeometry( 10, 10, 10, 10 );
+var geometry = new THREE.PlaneGeometry( 100, 100, 100, 100 );
 var material = new THREE.MeshLambertMaterial( {
-	color: 0x999999,
+	color: 0xffffff,
 	//wireframe: true,
-	map: texture
+	map: texture,
+	side: THREE.DoubleSide
 } );
 var plane = new THREE.Mesh( geometry, material );
 plane.castShadow = false;
 plane.receiveShadow = true;
 plane.rotateX(THREE.Math.degToRad(-90));
-plane.position.x = 5;
-plane.position.z = 5;
+plane.position.x = 50;
+plane.position.z = 50;
 scene.add( plane );
 
 var moonLight = new THREE.SpotLight( 0xCCFFFF, MOON_LIGHT_INTENSITY );
@@ -213,7 +268,7 @@ document.addEventListener('keydown', function(ev) {
 		case 32: // space
 			ev.preventDefault();
 
-			if ( canJump === true ) { velocity.y += 3; console.log("jump"); }
+			if ( canJump === true ) { velocity.y += JUMP_SPEED; console.log("jump"); }
 			canJump = false;
 			break;
 	}
@@ -288,7 +343,7 @@ loader.load( 'assets/Light Pole/Light Pole.obj', 'assets/Light Pole/Light Pole.m
 	console.log("loaded", object);
 	//object.position.z = - 100;
 	lightpole = object;
-	lightpole.scale.x = lightpole.scale.y = lightpole.scale.z = 0.04;
+	lightpole.scale.x = lightpole.scale.y = lightpole.scale.z = 0.4;
 	lightpole.castShadow = true;
 	lightpole.traverse(function(child ) {
 		if ( child instanceof THREE.Mesh ) {
@@ -307,28 +362,31 @@ loader.load( 'assets/Light Pole/Light Pole.obj', 'assets/Light Pole/Light Pole.m
 	for (var i=0; i<lightmap.length; i++) {
 		for (var j=0; j< lightmap[i].length; j++) {
 			if(lightmap[i][j] > 0) {
-				spotLight = new THREE.SpotLight( 0xffffff, 0 );
-				spotLight.position.set( i , 1 - 0.18, j - 0.24 );
+				spotLight = new THREE.SpotLight( 0xffffff, 1 );
+				spotLight.position.set( i , 8.2, j - 2.4 );
 				//spotLight.rotateOnAxis(new THREE.Vector3(0,-1,1), THREE.Math.degToRad(45));
-				//spotLight.castShadow = true;
+				spotLight.castShadow = true;
 				//spotLight.shadowCameraVisible = true;
 				spotLight.shadowCameraNear = 0.03;
-				spotLight.shadowCameraFar = 1 - 0.18;
-				spotLight.shadowCameraFov = 90;
+				spotLight.shadowCameraFar = 10;
+				spotLight.shadowCameraFov = 45;
 				var lightTarget = new THREE.Object3D();
-				lightTarget.position.set(i , 0, j - 0.24);
+				lightTarget.position.set(i , 0, j - 2.4 - 1);
 				scene.add(lightTarget);
 				spotLight.target = lightTarget;
 				scene.add( spotLight );
 
-				var directionalLight2 = new THREE.PointLight( 0xffffff, STREET_LIGHT_INTENSITY, 3 );
-				directionalLight2.position.set( i , 1 - 0.18, j - 0.24 );
+				var directionalLight2 = new THREE.PointLight( 0xffffff, STREET_LIGHT_INTENSITY, 8.2 );
+				directionalLight2.position.set( i , 8.2, j - 2.4 );
 				scene.add( directionalLight2 );
 
+				//var plh = new THREE.PointLightHelper(directionalLight2, 1);
+				//scene.add(plh);
+
 				var newlightpole = lightpole.clone();
-				newlightpole.position.set(i, 0.4, j);
+				newlightpole.position.set(i, 4, j);
 				newlightpole.rotateY(THREE.Math.degToRad(90 * lightmap[i][j]));
-				lightpoles.push({id: newlightpole.children[0].children[1].uuid, light: directionalLight2});
+				lightpoles.push({id: newlightpole.children[0].children[1].uuid, light: directionalLight2, spotlight: spotLight});
 				scene.add(newlightpole);
 			}
 		}
@@ -336,19 +394,14 @@ loader.load( 'assets/Light Pole/Light Pole.obj', 'assets/Light Pole/Light Pole.m
 
 	window.requestAnimationFrame(render);
 
-}, function(progress) {console.log("progress", progress)}, function(err) {"error", console.log(err)} );
-
-var texture_wall = THREE.ImageUtils.loadTexture( "assets/RedBrick.png" );
-texture_wall.wrapS = THREE.RepeatWrapping;
-texture_wall.wrapT = THREE.RepeatWrapping;
-texture_wall.repeat.set( 2, 2 );
+}, function(progress) {console.log("progress", progress)}, function(err) {console.log("error", err)} );
 
 // height map
 
 for (var i=0; i<heightmap.length; i++) {
 	for (var j=0; j< heightmap[i].length; j++) {
 		if(heightmap[i][j] > 0) {
-			var _geometry = new THREE.BoxGeometry(1, heightmap[i][j]*0.05, 1);
+			var _geometry = new THREE.BoxGeometry(1, heightmap[i][j], 1);
 			var _material = new THREE.MeshLambertMaterial({color: 0xffffff});
 			var _cube = new THREE.Mesh(_geometry, _material);
 
@@ -356,7 +409,7 @@ for (var i=0; i<heightmap.length; i++) {
 			_cube.receiveShadow = false;
 
 			_cube.position.z = i + 0.5;
-			_cube.position.y = (heightmap[i][j]*0.05)/2;
+			_cube.position.y = heightmap[i][j]/2;
 			_cube.position.x = j + 0.5;
 
 			scene.add(_cube);
@@ -364,22 +417,28 @@ for (var i=0; i<heightmap.length; i++) {
 	}
 }
 
-// layout map
-for (var i=0; i<map.length; i++) {
-	for (var j=0; j< map[i].length; j++) {
-		if(map[i][j] == 1) {
-			var _geometry = new THREE.BoxGeometry(1, 1, 1);
+// wall map
+
+var texture_wall = THREE.ImageUtils.loadTexture( "assets/RedBrick.png" );
+texture_wall.wrapS = THREE.RepeatWrapping;
+texture_wall.wrapT = THREE.RepeatWrapping;
+
+for (var i=0; i<wallmap.length; i++) {
+	for (var j=0; j< wallmap[i].length; j++) {
+		if(wallmap[i][j] > 0) {
+			texture_wall.repeat.set( 1, wallmap[i][j] );
+			var _geometry = new THREE.BoxGeometry(1, wallmap[i][j], 1);
 			var _material = new THREE.MeshLambertMaterial({color: 0xffffff, map: texture_wall});
-			var _cube = new THREE.Mesh(_geometry, _material);
+			var wall = new THREE.Mesh(_geometry, _material);
 
-			_cube.castShadow = true;
-			_cube.receiveShadow = false;
+			wall.castShadow = true;
+			wall.receiveShadow = false;
 
-			_cube.position.z = i + 0.5;
-			_cube.position.y = 0.5;
-			_cube.position.x = j + 0.5;
+			wall.position.z = i + 0.5;
+			wall.position.y = 0.5;
+			wall.position.x = j + 0.5;
 
-			scene.add(_cube);
+			scene.add(wall);
 		}
 	}
 }
@@ -387,7 +446,7 @@ for (var i=0; i<map.length; i++) {
 var objLoader = new THREE.OBJLoader();
 
 objLoader.load('assets/chain-fence.obj', function(_fence) {
-	_fence.scale.x = _fence.scale.y = _fence.scale.z = 0.05;
+	_fence.scale.x = _fence.scale.y = _fence.scale.z = 0.3;
 	//fence.traverse(function(child ) {
 	//
 	//	if ( child instanceof THREE.Mesh ) {
@@ -401,7 +460,7 @@ objLoader.load('assets/chain-fence.obj', function(_fence) {
 	//});
 	for(var i=0; i<10; i++) {
 		var fence = _fence.clone();
-		fence.position.x = i*0.98 + 0.5;
+		fence.position.x = i*5.9 + 3;
 		scene.add(fence);
 	};
 });
@@ -431,8 +490,9 @@ objLoader.load('assets/chain-fence.obj', function(_fence) {
 //}, function(progress) {console.log("progress", progress)}, function(err) {"error", console.log(err)} );
 
 controls.getObject().translateZ(5);
+controls.getObject().translateX(1);
 var prevTime = performance.now();
-var intersects_fwd;
+//var intersects_fwd;
 function render() {
 	stats.begin();
 
@@ -440,14 +500,14 @@ function render() {
 	//intersects_fwd = raycaster.intersectObjects( scene.children );
 	var prevcellx = Math.floor(controls.getObject().position.x);
 	var prevcellz = Math.floor(controls.getObject().position.z);
-	var prevcellHeight = heightmap[prevcellz][prevcellx] * 0.05;
+	var prevcellHeight = heightmap[prevcellz][prevcellx];
 
 	if(MOVE_FWD) {
 		//if(!move_clip || intersects_fwd.length == 0 || intersects_fwd[0].distance > 0.4) {
 			controls.getObject().translateZ(-MOVE_SPEED);
 
-			var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)] * 0.05;
-			if(cellHeight > prevcellHeight + 0.06) {
+			var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)];
+			if(cellHeight > prevcellHeight + stepheight) {
 				controls.getObject().translateZ(MOVE_SPEED);
 			}
 		//}
@@ -456,8 +516,8 @@ function render() {
 	if(MOVE_BCK) {
 		controls.getObject().translateZ(MOVE_SPEED);
 
-		var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)] * 0.05;
-		if(cellHeight > prevcellHeight + 0.05) {
+		var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)];
+		if(cellHeight > prevcellHeight + stepheight) {
 			controls.getObject().translateZ(-MOVE_SPEED);
 		}
 	}
@@ -472,8 +532,8 @@ function render() {
 			controls.getObject().translateX(-MOVE_SPEED);
 		//}
 
-		var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)] * 0.05;
-		if(cellHeight > prevcellHeight + 0.05) {
+		var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)];
+		if(cellHeight > prevcellHeight + stepheight) {
 			controls.getObject().translateX(MOVE_SPEED);
 		}
 	}
@@ -488,25 +548,25 @@ function render() {
 			controls.getObject().translateX(MOVE_SPEED);
 		//}
 
-		var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)] * 0.05;
-		if(cellHeight > prevcellHeight + 0.05) {
+		var cellHeight = heightmap[Math.floor(controls.getObject().position.z)][Math.floor(controls.getObject().position.x)];
+		if(cellHeight > prevcellHeight + stepheight) {
 			controls.getObject().translateX(-MOVE_SPEED);
 		}
 	}
 	var cellx = Math.floor(controls.getObject().position.x);
 	var cellz = Math.floor(controls.getObject().position.z);
-	var cellHeight = heightmap[cellz][cellx] * 0.05;
+	var cellHeight = heightmap[cellz][cellx];
 	//console.log(cellx, cellz, cellHeight);
 	var time = performance.now();
 	var delta = ( time - prevTime ) / 1000;
 
-	velocity.y -= 9.8 * 1 * delta;
+	velocity.y -= 15 * delta;
 	controls.getObject().translateY( velocity.y * delta );
 
-	if ( controls.getObject().position.y < cellHeight + 0.5 ) {
+	if ( controls.getObject().position.y < cellHeight + PLAYER_HEIGHT ) {
 
 		velocity.y = 0;
-		controls.getObject().position.y = cellHeight + 0.5;
+		controls.getObject().position.y = cellHeight + PLAYER_HEIGHT;
 
 		canJump = true;
 
